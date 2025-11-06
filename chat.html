@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Básico - Lenguaje Artificial</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 900;
+            margin-bottom: 1rem;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.8rem 1.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-bottom: 2rem;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateX(-5px);
+        }
+
+        .content-section {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            animation: fadeInUp 1s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .content-section h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: #f093fb;
+        }
+
+        .code-container {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .code-container pre {
+            margin: 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: #e0e0e0;
+        }
+
+        .code-container code {
+            display: block;
+        }
+
+        .keyword { color: #ff79c6; }
+        .string { color: #f1fa8c; }
+        .comment { color: #6272a4; font-style: italic; }
+        .function { color: #50fa7b; }
+
+        .glossary {
+            display: grid;
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .glossary-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border-left: 4px solid #f093fb;
+            transition: all 0.3s ease;
+        }
+
+        .glossary-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(5px);
+        }
+
+        .glossary-term {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #f093fb;
+            margin-bottom: 0.5rem;
+            font-family: 'Courier New', monospace;
+        }
+
+        .glossary-definition {
+            line-height: 1.7;
+            opacity: 0.95;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            .content-section {
+                padding: 1.5rem;
+            }
+
+            .code-container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-button">← Volver al catálogo</a>
+        
+        <div class="header">
+            <h1>🤖 Chatbot Básico con Listas</h1>
+            <p>Sistema de conversación simple usando Python</p>
+        </div>
+
+        <div class="content-section">
+            <h2>💻 Código del Chatbot</h2>
+            
+            <div class="code-container">
+                <pre><code><span class="comment"># Ejemplo de chat bot con listas básico</span>
+<span class="keyword">import</span> random
+
+<span class="comment"># Lista de saludos y respuestas</span>
+saludos = [<span class="string">"hola"</span>, <span class="string">"que tal"</span>, <span class="string">"buenos dias"</span>, <span class="string">"buenas tardes"</span>, <span class="string">"buenas noches"</span>]
+respuestas = [<span class="string">"hola, como estas?"</span>,
+            <span class="string">"como puedo ayudarte"</span>,
+            <span class="string">"hola como te va"</span>,
+            <span class="string">"que hay?"</span>]
+
+despedida = [<span class="string">"adios"</span>, <span class="string">"bye"</span>, <span class="string">"gracias"</span>, <span class="string">"nos vemos"</span>, <span class="string">"hasta luego"</span>, <span class="string">"salir"</span>]
+respuesta_despedida = [
+    <span class="string">"adios, hasta pronto"</span>,
+    <span class="string">"fue un placer ayudarte"</span>,
+    <span class="string">"cuidate"</span>,
+    <span class="string">"nos vemos luego"</span>,
+    <span class="string">"bye"</span>
+]
+
+pregunta = [<span class="string">"que haces"</span>]
+respuesta_pregunta = [<span class="string">"ayudandote a contestar tus preguntas"</span>,
+                  <span class="string">"nada estoy triste"</span>,
+                  <span class="string">" estoy enojado"</span>,
+                  <span class="string">" estoy feliz"</span>]
+
+<span class="comment"># Mensaje de bienvenida del chatbot</span>
+<span class="function">print</span>(<span class="string">"Hola soy Chato, tu chabot de confianza, si deseas "</span>
+      <span class="string">"terminar escribe salir"</span>)
+
+<span class="keyword">while</span> <span class="keyword">True</span>:
+    usuario = <span class="function">input</span>(<span class="string">"Tu:"</span>).<span class="function">lower</span>().<span class="function">strip</span>()
+
+    <span class="keyword">if</span> usuario <span class="keyword">in</span> saludos:
+        <span class="function">print</span>(<span class="string">"chatbot:"</span>, random.<span class="function">choice</span>(respuestas))
+    <span class="keyword">elif</span> usuario <span class="keyword">in</span> pregunta:
+        <span class="function">print</span>(<span class="string">"chatbot:"</span>, random.<span class="function">choice</span>(respuesta_pregunta))
+    <span class="keyword">elif</span> usuario <span class="keyword">in</span> despedida:
+        <span class="function">print</span>(<span class="string">"chatbot:"</span>, random.<span class="function">choice</span>(respuesta_despedida))
+        <span class="keyword">break</span></code></pre>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>📚 Glosario de Palabras Clave</h2>
+            
+            <div class="glossary">
+                <div class="glossary-item">
+                    <div class="glossary-term">import</div>
+                    <div class="glossary-definition">
+                        Palabra clave que permite importar módulos o bibliotecas externas a tu programa. En este caso, importa el módulo <code>random</code> para poder usar sus funciones de aleatoriedad.
+                    </div>
+                </div>
+
+                <div class="glossary-item">
+                    <div class="glossary-term">random</div>
+                    <div class="glossary-definition">
+                        Módulo de Python que proporciona funciones para generar números aleatorios y hacer selecciones aleatorias. Se utiliza para elegir respuestas al azar de las listas.
+                    </div>
+                </div>
+
+                <div class="glossary-item">
+                    <div class="glossary-term">[ ]</div>
+                    <div class="glossary-definition">
+                        Corchetes que definen una lista en Python. Las listas son colecciones ordenadas y modificables que pueden contener múltiples elementos del mismo o diferentes tipos.
+                    </div>
+                </div>
+
+                <div class="glossary-item">
+                    <div class="glossary-term">print()</div>
+                    <div class="glossary-definition">
+                        Función incorporada de Python que muestra información en la consola o terminal. Se utiliza para imprimir mensajes al usuario y las respuestas del chatbot.
+                    </div>
+                </div>
+
+                <div class="glossary-item">
+                    <div class="glossary-term">while</div>
+                    <div class="glossary-definition">
+                        Palabra clave que crea un bucle que se ejecuta mientras una condición sea verdadera. En este caso, <code>while True</code> crea un bucle infinito que mantiene el chatbot funcionando.
+                    </div>
+                </div>
+
+                <div class="glossary-item">
+                    <div class="glossary-term">True</div>
+                    <div class="glossary-definition">
+                        Valor booleano que representa verdadero en Python. Cuando se usa con <code>while</code>, crea un bucle que se ejecuta indefinidamente hasta que se rompa con <code>break</code>.
+                    </div>
+                </div>
+
+                <div class="glossary-item">
+                    <div class="glossary-term">input()</div>
+                    <div class="glossary-definition">
+                        Función que solicita entrada de datos al usuario desde el teclado. Pausa la ejecución del programa hasta que el usuario escriba algo y presione Enter.
+                    </div>
+                </div>
+
+                <div class="glossary-item">
+                    <div class="glossary-term">.lower()</div>
+                    <div class="glossary-definition">
+                        Método de cadena que convierte todo el texto a minúsculas. Esto ayuda a hacer comparaciones sin importar si el usuario escribe en mayúsculas o minúsculas.
+                    </div>
+                </div>
+
+                <div class="glossary-item">
+                    <div class="glossary-term">.strip()</div>
+                    <div class="glossary-definition">
+                        Método de cadena que elimina espacios en blanco al inicio y al final del texto. Útil para limpiar la entrada del usuario de espacios innecesarios.
+                    </div>
+                </div>
+
+                <div class="glossary-item">
+                    <div class="glossary-term">if</div>
+                    <div class="glossary-definition">
+                        Palabra clave que inicia una estructura condicional. Ejecuta un bloque de código solo si la condición especificada es verdadera.
+                    </div>
+                </div>
+
+                <div class="glossary-item">
+                    <div class="glossary-term">elif</div>
+                    <div class="glossary-definition">
+                        Abreviatura de "else if". Permite evaluar múltiples condiciones en secuencia. Se ejecuta solo si las condiciones anteriores fueron falsas.
+                    </div>
+                </div>
+
+                <div class="glossary-item">
+                    <div class="glossary-term">in</div>
+                    <div class="glossary-definition">
+                        Operador que verifica si un elemento existe dentro de una colección (como una lista). Devuelve <code>True</code> si el elemento está presente, <code>False</code> si no.
+                    </div>
+                </div>
+
+                <div class="glossary-item">
+                    <div class="glossary-term">random.choice()</div>
+                    <div class="glossary-definition">
+                        Función del módulo random que selecciona un elemento aleatorio de una lista. Se usa para que el chatbot dé respuestas variadas de forma aleatoria.
+                    </div>
+                </div>
+
+                <div class="glossary-item">
+                    <div class="glossary-term">break</div>
+                    <div class="glossary-definition">
+                        Palabra clave que termina inmediatamente la ejecución de un bucle. En este chatbot, se usa para salir del bucle <code>while</code> cuando el usuario se despide.
+                    </div>
+                </div>
+
+                <div class="glossary-item">
+                    <div class="glossary-term"># comentario</div>
+                    <div class="glossary-definition">
+                        El símbolo <code>#</code> indica un comentario en Python. Todo lo que sigue después de <code>#</code> en esa línea es ignorado por el intérprete y sirve para documentar el código.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
