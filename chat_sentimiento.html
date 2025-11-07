@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot con Análisis de Sentimiento</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .back-button {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            padding: 0.8rem 1.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateX(-5px);
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-container {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            padding: 2rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .welcome-message {
+            background: rgba(240, 147, 251, 0.3);
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            border: 2px solid rgba(240, 147, 251, 0.4);
+        }
+
+        .welcome-message h2 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-message p {
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+            min-height: 300px;
+            max-height: 400px;
+        }
+
+        .message {
+            margin-bottom: 1rem;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message-content {
+            display: inline-block;
+            padding: 1rem 1.5rem;
+            border-radius: 15px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+
+        .user-message .message-content {
+            background: rgba(240, 147, 251, 0.4);
+            border: 2px solid rgba(240, 147, 251, 0.5);
+            float: right;
+            clear: both;
+        }
+
+        .bot-message .message-content {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            float: left;
+            clear: both;
+        }
+
+        .sentiment-indicator {
+            display: inline-block;
+            margin-left: 0.5rem;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .sentiment-positive {
+            background: rgba(76, 175, 80, 0.3);
+            border: 1px solid rgba(76, 175, 80, 0.5);
+        }
+
+        .sentiment-negative {
+            background: rgba(244, 67, 54, 0.3);
+            border: 1px solid rgba(244, 67, 54, 0.5);
+        }
+
+        .sentiment-neutral {
+            background: rgba(158, 158, 158, 0.3);
+            border: 1px solid rgba(158, 158, 158, 0.5);
+        }
+
+        .input-container {
+            display: flex;
+            gap: 1rem;
+        }
+
+        #userInput {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            color: white;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        #userInput::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        #userInput:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(240, 147, 251, 0.5);
+        }
+
+        button {
+            padding: 1rem 2rem;
+            background: rgba(240, 147, 251, 0.4);
+            border: 2px solid rgba(240, 147, 251, 0.5);
+            border-radius: 12px;
+            color: white;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: rgba(240, 147, 251, 0.6);
+            transform: scale(1.05);
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        .info-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 12px;
+            margin-top: 1rem;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .info-box h3 {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            color: rgba(240, 147, 251, 1);
+        }
+
+        .info-box p {
+            font-size: 0.9rem;
+            opacity: 0.85;
+            line-height: 1.5;
+        }
+
+        /* Glossary Styles */
+        .glossary-section {
+            max-width: 1200px;
+            width: 100%;
+            margin: 2rem auto 0;
+        }
+
+        .glossary-title {
+            font-size: 2rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 2rem;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .glossary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .glossary-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .glossary-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(240, 147, 251, 0.5);
+            box-shadow: 0 10px 30px rgba(240, 147, 251, 0.3);
+        }
+
+        .function-header {
+            background: rgba(240, 147, 251, 0.3);
+            padding: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .function-icon {
+            font-size: 2rem;
+        }
+
+        .function-header h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .function-body {
+            padding: 1.5rem;
+        }
+
+        .function-description {
+            font-size: 0.95rem;
+            opacity: 0.9;
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .code-snippet {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            border-left: 4px solid rgba(240, 147, 251, 0.6);
+        }
+
+        .code-snippet code {
+            color: #f093fb;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        .function-details {
+            list-style: none;
+            padding: 0;
+        }
+
+        .function-details li {
+            padding: 0.5rem 0;
+            font-size: 0.9rem;
+            opacity: 0.9;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .function-details li:last-child {
+            border-bottom: none;
+        }
+
+        .function-details strong {
+            color: rgba(240, 147, 251, 1);
+            font-weight: 600;
+        }
+
+        .methodology-box {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .methodology-box h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .methodology-content {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .method-step {
+            display: flex;
+            gap: 1.5rem;
+            align-items: start;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1.2rem;
+            border-radius: 12px;
+            border-left: 4px solid rgba(240, 147, 251, 0.6);
+        }
+
+        .step-number {
+            background: rgba(240, 147, 251, 0.4);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .method-step h4 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: rgba(240, 147, 251, 1);
+        }
+
+        .method-step p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+
+        .comparison-box {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            padding: 2rem;
+        }
+
+        .comparison-box h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .comparison-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .comparison-item h4 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: rgba(240, 147, 251, 1);
+        }
+
+        .comparison-item ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .comparison-item li {
+            padding: 0.6rem 0;
+            font-size: 0.9rem;
+            opacity: 0.9;
+            line-height: 1.5;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .comparison-item li::before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: rgba(240, 147, 251, 1);
+            font-weight: bold;
+        }
+
+        .comparison-item code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            color: #f093fb;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .back-button {
+                position: static;
+                margin-bottom: 1rem;
+                display: block;
+                text-align: center;
+            }
+
+            .messages {
+                min-height: 250px;
+            }
+
+            .input-container {
+                flex-direction: column;
+            }
+
+            .glossary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .glossary-title {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-button">← Volver al inicio</a>
+    
+    <div class="header">
+        <h1>💬 Chatbot con Análisis de Sentimiento</h1>
+        <p>Chato detecta tus emociones y responde apropiadamente</p>
+    </div>
+
+    <div class="container">
+        <div class="chat-container">
+            <div class="welcome-message">
+                <h2>👋 ¡Hola! Soy Chato</h2>
+                <p>Tu chatbot de confianza con análisis de sentimiento. Escribe "salir" para terminar la conversación.</p>
+            </div>
+
+            <div class="messages" id="messages"></div>
+
+            <div class="input-container">
+                <input 
+                    type="text" 
+                    id="userInput" 
+                    placeholder="Escribe tu mensaje aquí..."
+                    autocomplete="off"
+                >
+                <button onclick="sendMessage()">Enviar</button>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <h3>📊 Análisis de Sentimiento</h3>
+            <p>Este chatbot analiza el sentimiento de tus mensajes usando reglas simples. Los mensajes positivos reciben respuestas alegres, mientras que los negativos reciben respuestas empáticas.</p>
+        </div>
+
+        <div class="glossary-section">
+            <h2 class="glossary-title">📖 Glosario de Funciones</h2>
+            
+            <div class="glossary-grid">
+                <div class="glossary-card">
+                    <div class="function-header">
+                        <span class="function-icon">🔄</span>
+                        <h3>GoogleTranslator</h3>
+                    </div>
+                    <div class="function-body">
+                        <p class="function-description">Traduce el texto del usuario de español a inglés para el análisis.</p>
+                        <div class="code-snippet">
+                            <code>GoogleTranslator(source="auto",target="en")</code>
+                        </div>
+                        <ul class="function-details">
+                            <li><strong>Librería:</strong> deep_translator</li>
+                            <li><strong>Función:</strong> Detecta automáticamente el idioma y traduce a inglés</li>
+                            <li><strong>Uso:</strong> Necesario porque TextBlob funciona mejor en inglés</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="glossary-card">
+                    <div class="function-header">
+                        <span class="function-icon">🧠</span>
+                        <h3>TextBlob</h3>
+                    </div>
+                    <div class="function-body">
+                        <p class="function-description">Analiza el sentimiento del texto traducido usando procesamiento de lenguaje natural.</p>
+                        <div class="code-snippet">
+                            <code>analizar = TextBlob(trad)<br>analizar.polarity</code>
+                        </div>
+                        <ul class="function-details">
+                            <li><strong>Librería:</strong> textblob</li>
+                            <li><strong>Polarity:</strong> Valor entre -1 (negativo) y +1 (positivo)</li>
+                            <li><strong>Retorno:</strong> 0 para neutral, >0 positivo, <0 negativo</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="glossary-card">
+                    <div class="function-header">
+                        <span class="function-icon">🔁</span>
+                        <h3>while True</h3>
+                    </div>
+                    <div class="function-body">
+                        <p class="function-description">Bucle infinito que mantiene el chatbot funcionando continuamente.</p>
+                        <div class="code-snippet">
+                            <code>while True:<br>&nbsp;&nbsp;&nbsp;&nbsp;usuario=input("Tu:")</code>
+                        </div>
+                        <ul class="function-details">
+                            <li><strong>Función:</strong> Permite conversación continua</li>
+                            <li><strong>Salida:</strong> Se rompe con 'break' cuando el usuario escribe "adios"</li>
+                            <li><strong>Input:</strong> Captura mensaje del usuario en cada iteración</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="glossary-card">
+                    <div class="function-header">
+                        <span class="function-icon">🎲</span>
+                        <h3>random.choice()</h3>
+                    </div>
+                    <div class="function-body">
+                        <p class="function-description">Selecciona aleatoriamente una respuesta de las listas predefinidas.</p>
+                        <div class="code-snippet">
+                            <code>random.choice(respuesta_feliz)</code>
+                        </div>
+                        <ul class="function-details">
+                            <li><strong>Módulo:</strong> random</li>
+                            <li><strong>Parámetro:</strong> Lista de respuestas (felices o tristes)</li>
+                            <li><strong>Retorno:</strong> Una respuesta aleatoria para dar variedad al chatbot</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="glossary-card">
+                    <div class="function-header">
+                        <span class="function-icon">📊</span>
+                        <h3>Condicionales if/elif</h3>
+                    </div>
+                    <div class="function-body">
+                        <p class="function-description">Evalúa la polaridad y selecciona la respuesta apropiada según el sentimiento.</p>
+                        <div class="code-snippet">
+                            <code>if analizar.polarity>0:<br>&nbsp;&nbsp;&nbsp;&nbsp;respuesta_feliz<br>elif analizar.polarity<0:<br>&nbsp;&nbsp;&nbsp;&nbsp;respuesta_triste</code>
+                        </div>
+                        <ul class="function-details">
+                            <li><strong>Positivo (>0):</strong> Usa lista respuesta_feliz</li>
+                            <li><strong>Negativo (<0):</strong> Usa lista respuesta_triste</li>
+                            <li><strong>Salida:</strong> Detecta palabra "adios" para terminar conversación</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="methodology-box">
+                <h3>🧠 Metodología del Análisis de Sentimiento</h3>
+                <div class="methodology-content">
+                    <div class="method-step">
+                        <span class="step-number">1</span>
+                        <div>
+                            <h4>Captura del Texto</h4>
+                            <p>El usuario escribe un mensaje que se captura desde el input</p>
+                        </div>
+                    </div>
+                    <div class="method-step">
+                        <span class="step-number">2</span>
+                        <div>
+                            <h4>Normalización</h4>
+                            <p>El texto se convierte a minúsculas con toLowerCase() para comparación uniforme</p>
+                        </div>
+                    </div>
+                    <div class="method-step">
+                        <span class="step-number">3</span>
+                        <div>
+                            <h4>Análisis Léxico</h4>
+                            <p>Se buscan palabras clave positivas y negativas mediante includes()</p>
+                        </div>
+                    </div>
+                    <div class="method-step">
+                        <span class="step-number">4</span>
+                        <div>
+                            <h4>Cálculo de Polaridad</h4>
+                            <p>Se suma +1 por cada palabra positiva y -1 por cada negativa</p>
+                        </div>
+                    </div>
+                    <div class="method-step">
+                        <span class="step-number">5</span>
+                        <div>
+                            <h4>Selección de Respuesta</h4>
+                            <p>Según el puntaje (>0, <0, =0) se elige una respuesta apropiada</p>
+                        </div>
+                    </div>
+                    <div class="method-step">
+                        <span class="step-number">6</span>
+                        <div>
+                            <h4>Visualización</h4>
+                            <p>Se muestra el mensaje con indicador de sentimiento y la respuesta del bot</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="comparison-box">
+                <h3>🔄 Comparación: Python vs JavaScript</h3>
+                <div class="comparison-grid">
+                    <div class="comparison-item">
+                        <h4>🐍 Python (Original)</h4>
+                        <ul>
+                            <li>Usa <code>GoogleTranslator</code> para traducir</li>
+                            <li>Usa <code>TextBlob</code> para análisis de sentimiento</li>
+                            <li>Depende de librerías externas</li>
+                            <li>Loop infinito con <code>while True</code></li>
+                            <li>Input/Output por consola</li>
+                        </ul>
+                    </div>
+                    <div class="comparison-item">
+                        <h4>⚡ JavaScript (HTML)</h4>
+                        <ul>
+                            <li>Análisis léxico simple con arrays</li>
+                            <li>No requiere librerías externas</li>
+                            <li>Interfaz gráfica interactiva</li>
+                            <li>Eventos asíncronos con <code>addEventListener</code></li>
+                            <li>Respuestas con <code>setTimeout()</code></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const respuestasIniciales = [
+            "hola, ¿cómo estás?",
+            "¿cómo puedo ayudarte?",
+            "hola, ¿cómo te va?",
+            "¿qué hay?"
+        ];
+
+        const respuestasFelices = [
+            "¡Qué bien! Me alegro mucho",
+            "¡Excelente! Me encanta tu energía positiva",
+            "¡Genial! Sigue así",
+            "¡Fantástico! Eso es maravilloso"
+        ];
+
+        const respuestasTriste = [
+            "Qué mal, lamento escuchar eso",
+            "Espero que te mejores pronto",
+            "Comprendo cómo te sientes",
+            "Estoy aquí para escucharte"
+        ];
+
+        const respuestasNeutrales = [
+            "Entiendo",
+            "Cuéntame más",
+            "¿Qué más quieres compartir?",
+            "Estoy escuchando"
+        ];
+
+        const palabrasPositivas = ["feliz", "alegre", "contento", "bien", "genial", "excelente", "maravilloso", "fantástico", "amor", "emocionado"];
+        const palabrasNegativas = ["triste", "enojado", "mal", "terrible", "horrible", "odio", "furioso", "deprimido", "frustrado"];
+
+        function analizarSentimiento(texto) {
+            texto = texto.toLowerCase();
+            let puntaje = 0;
+
+            // Análisis simple basado en palabras clave
+            for (let palabra of palabrasPositivas) {
+                if (texto.includes(palabra)) puntaje += 1;
+            }
+            for (let palabra of palabrasNegativas) {
+                if (texto.includes(palabra)) puntaje -= 1;
+            }
+
+            return puntaje;
+        }
+
+        function addMessage(content, isUser, sentiment = null) {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = isUser ? 'message user-message' : 'message bot-message';
+            
+            let sentimentHTML = '';
+            if (sentiment !== null && isUser) {
+                let sentimentClass = 'sentiment-neutral';
+                let sentimentText = 'Neutral';
+                
+                if (sentiment > 0) {
+                    sentimentClass = 'sentiment-positive';
+                    sentimentText = '😊 Positivo';
+                } else if (sentiment < 0) {
+                    sentimentClass = 'sentiment-negative';
+                    sentimentText = '😔 Negativo';
+                }
+                
+                sentimentHTML = `<span class="sentiment-indicator ${sentimentClass}">${sentimentText}</span>`;
+            }
+            
+            messageDiv.innerHTML = `
+                <div class="message-content">
+                    ${isUser ? '👤 ' : '🤖 '}${content}
+                    ${sentimentHTML}
+                </div>
+            `;
+            
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function getRandomResponse(array) {
+            return array[Math.floor(Math.random() * array.length)];
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('userInput');
+            const mensaje = input.value.trim();
+            
+            if (!mensaje) return;
+            
+            const polaridad = analizarSentimiento(mensaje);
+            
+            addMessage(mensaje, true, polaridad);
+            
+            if (mensaje.toLowerCase() === 'salir') {
+                setTimeout(() => {
+                    addMessage('¡Adiós! Fue un placer conversar contigo. 👋', false);
+                    input.disabled = true;
+                }, 500);
+                input.value = '';
+                return;
+            }
+            
+            setTimeout(() => {
+                let respuesta;
+                
+                if (polaridad > 0) {
+                    respuesta = getRandomResponse(respuestasFelices);
+                } else if (polaridad < 0) {
+                    respuesta = getRandomResponse(respuestasTriste);
+                } else {
+                    respuesta = getRandomResponse(respuestasNeutrales);
+                }
+                
+                addMessage(respuesta, false);
+            }, 500);
+            
+            input.value = '';
+        }
+
+        document.getElementById('userInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Mensaje de bienvenida inicial
+        setTimeout(() => {
+            addMessage(getRandomResponse(respuestasIniciales), false);
+        }, 500);
+    </script>
+</body>
+</html>
